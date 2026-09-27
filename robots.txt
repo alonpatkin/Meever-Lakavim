@@ -1,0 +1,8 @@
+# robots.txt — מעבר לקווים
+# גרסת ייצור (production): מאפשרת לגוגל לסרוק ולאנדקס את האתר.
+# SEO TODO: כשעוברים לדומיין הקבוע, עדכנו את כתובת ה-Sitemap למטה.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://erezhor.github.io/sigal_mever_lakavim/sitemap.xml
