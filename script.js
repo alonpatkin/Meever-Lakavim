@@ -163,10 +163,10 @@ document.addEventListener('DOMContentLoaded', () => {
             dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === tIndex));
         }
 
-        prevTBtn.addEventListener('click', () => { goToTestimonial(tIndex + 1); resetTAutoplay(); });
-        nextTBtn.addEventListener('click', () => { goToTestimonial(tIndex - 1); resetTAutoplay(); });
+        prevTBtn.addEventListener('click', () => { goToTestimonial(tIndex - 1); resetTAutoplay(); });
+        nextTBtn.addEventListener('click', () => { goToTestimonial(tIndex + 1); resetTAutoplay(); });
 
-        function startTAutoplay() { tAutoplay = setInterval(() => goToTestimonial(tIndex - 1), 5000); }
+        function startTAutoplay() { tAutoplay = setInterval(() => goToTestimonial(tIndex + 1), 5000); }
         function resetTAutoplay() { clearInterval(tAutoplay); startTAutoplay(); }
         startTAutoplay();
 
@@ -211,11 +211,26 @@ document.addEventListener('DOMContentLoaded', () => {
             const phone = phoneInput.value.trim();
             const email = document.getElementById('email').value.trim();
             const message = document.getElementById('message').value.trim();
+            const now = new Date().toLocaleString('he-IL', { timeZone: 'Asia/Jerusalem' });
             
             const btnSubmit = contactForm.querySelector('.btn-submit');
             const originalText = btnSubmit.textContent;
             btnSubmit.disabled = true;
             btnSubmit.textContent = 'שולח...';
+
+            // Build a clean formatted message body for the email template
+            const formattedMessage = `
+✨ פנייה חדשה מאתר מעבר לקווים
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+👤 שם:       ${name}
+📞 טלפון:    ${phone}
+${email ? `📧 אימייל:   ${email}\n` : ''}💬 הודעה:
+${message || '(לא נכתבה הודעה)'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🕐 תאריך ושעה: ${now}
+            `.trim();
 
             fetch('https://formsubmit.co/ajax/diegal05@gmail.com', {
                 method: 'POST',
@@ -226,29 +241,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({
                     name: name,
                     phone: phone,
-                    email: email,
-                    message: message || 'ללא הודעה',
-                    _subject: "✨ פנייה חדשה מאתר מעבר לקווים!"
+                    email: email || 'לא סופק',
+                    message: formattedMessage,
+                    _subject: `✨ פנייה חדשה מ${name} | מעבר לקווים`,
+                    _template: 'table',
+                    _captcha: 'false'
                 })
             })
             .then(response => response.json())
             .then(data => {
-                btnSubmit.textContent = 'נשלח בהצלחה!';
+                btnSubmit.textContent = 'נשלח בהצלחה! 🎨';
                 btnSubmit.style.backgroundColor = 'var(--clr-primary-green)';
+                formFeedback.textContent = 'תודה! נחזור אליך בהקדם.';
+                formFeedback.style.color = 'var(--clr-cta-teal)';
                 contactForm.reset();
                 setTimeout(() => {
                     btnSubmit.textContent = originalText;
                     btnSubmit.disabled = false;
                     btnSubmit.style.backgroundColor = '';
-                }, 4000);
+                    formFeedback.textContent = '';
+                }, 5000);
             })
             .catch(error => {
                 console.error('Error:', error);
                 btnSubmit.textContent = 'שגיאה בשליחה. נסו שוב.';
+                formFeedback.textContent = 'אירעה שגיאה. אפשר ליצור קשר בוואטסאפ: 052-8824630';
+                formFeedback.style.color = '#d32f2f';
                 setTimeout(() => {
                     btnSubmit.textContent = originalText;
                     btnSubmit.disabled = false;
-                }, 4000);
+                    formFeedback.textContent = '';
+                }, 6000);
             });
         } else {
             formFeedback.textContent = 'אנא תקן את השגיאות בטופס.';
