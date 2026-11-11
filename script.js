@@ -137,15 +137,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Testimonials Carousel ---
+    // --- Testimonials Carousel (Fade) ---
     const testimonialsTrack = document.getElementById('testimonials-track');
     if (testimonialsTrack) {
         const testimonialSlides = Array.from(testimonialsTrack.children);
+        const total = testimonialSlides.length;
         const dotsContainer = document.getElementById('testimonials-dots');
         const prevTBtn = document.querySelector('.prev-t');
         const nextTBtn = document.querySelector('.next-t');
         let tIndex = 0;
-        let tAutoplay;
+        let tAutoplay = null;
+
+        // Show first slide
+        testimonialSlides[0].classList.add('active');
 
         // Build dots
         testimonialSlides.forEach((_, i) => {
@@ -158,20 +162,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         function goToTestimonial(index) {
-            tIndex = (index + testimonialSlides.length) % testimonialSlides.length;
-            testimonialsTrack.style.transform = `translateX(${tIndex * 100}%)`;
-            dotsContainer.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === tIndex));
+            const newIndex = ((index % total) + total) % total;
+            if (newIndex === tIndex) return;
+            testimonialSlides[tIndex].classList.remove('active');
+            dotsContainer.children[tIndex].classList.remove('active');
+            tIndex = newIndex;
+            testimonialSlides[tIndex].classList.add('active');
+            dotsContainer.children[tIndex].classList.add('active');
+        }
+
+        function startTAutoplay() {
+            tAutoplay = setInterval(() => goToTestimonial(tIndex + 1), 14000);
+        }
+        function resetTAutoplay() {
+            clearInterval(tAutoplay);
+            startTAutoplay();
         }
 
         prevTBtn.addEventListener('click', () => { goToTestimonial(tIndex - 1); resetTAutoplay(); });
         nextTBtn.addEventListener('click', () => { goToTestimonial(tIndex + 1); resetTAutoplay(); });
 
-        function startTAutoplay() { tAutoplay = setInterval(() => goToTestimonial(tIndex + 1), 5000); }
-        function resetTAutoplay() { clearInterval(tAutoplay); startTAutoplay(); }
-        startTAutoplay();
+        // Pause on hover
+        const carouselEl = testimonialsTrack.closest('.testimonials-carousel');
+        carouselEl.addEventListener('mouseenter', () => clearInterval(tAutoplay));
+        carouselEl.addEventListener('mouseleave', startTAutoplay);
 
-        testimonialsTrack.parentElement.addEventListener('mouseenter', () => clearInterval(tAutoplay));
-        testimonialsTrack.parentElement.addEventListener('mouseleave', startTAutoplay);
+        startTAutoplay();
     }
 
     // --- Contact Form Validation ---
@@ -339,3 +355,4 @@ ${message || '(לא נכתבה הודעה)'}
         body.classList.remove('high-contrast', 'highlight-links');
     });
 });
+
